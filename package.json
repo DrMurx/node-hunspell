@@ -1,0 +1,22 @@
+{
+  "name": "node-hunspell",
+  "version": "0.0.1",
+  "description": "A native Node.js implementation of hunspell",
+  "main": "index.js",
+  "dependencies": {
+    "bufferstream": "~0.6.0",
+    "iconv": "~2.0.6",
+    "buffertools": "~1.1.1",
+    "optimist": "~0.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "spellchecker",
+    "hunspell"
+  ],
+  "author": "Jan Kunzmann <jan-github@phobia.de>",
+  "license": "MIT"
+}
