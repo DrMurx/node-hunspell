@@ -6,17 +6,16 @@ var optimist  = require('optimist')
                 .describe('l', 'Language to load'),
     argv      = optimist.argv,
     fs        = require('fs'),
-    affreader = require('./lib/affreader'),
-    dictreader = require('./lib/dictreader');
+    reader    = require('./lib/reader');
 
 
 function read(dictFile, affFile) {
   if (!dictFile.match(/\.dic$/)) return;
   if (!affFile.match(/\.aff$/)) return;
 
-  var AffReader = new affreader.AffixReader(affFile);
+  var Reader = new reader.Reader(dictFile, affFile);
 
-  AffReader
+  Reader
     .on('lang', function(err, lang) {
       console.log(this.file + ": Language " + this.language);
     })
@@ -44,18 +43,15 @@ function read(dictFile, affFile) {
     .on('suffix', function(err, flag, affix) {
       console.log(this.file + ": Suffix " + flag);
     })
+    .on('key', function(err, keys) {
+      console.log(this.file + ": key ", keys);
+    })
+    .on('word', function(err, entry) {
+      console.log(entry.word);
+    })
     ;
 
-  AffReader.load(function() {
-    console.log('Done with ' + affFile);
-    var DictReader = new dictreader.DictReader(dictFile, AffReader);
-
-    DictReader.on('word', function(err, entry) {
-      console.log(entry.word);
-    });
-
-    DictReader.load();
-  });  
+  Reader.load();
 }
 
 if (argv.lang) {
