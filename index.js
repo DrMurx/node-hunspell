@@ -15,39 +15,55 @@ function read(dictFile, affFile) {
 
   var Reader = new reader.Reader(dictFile, affFile);
 
+  function info(err, label, info) {
+    console.log(dictFile + ": " + label + " " + info);
+  }
+
   Reader
     .on('lang', function(err, lang) {
-      console.log(this.file + ": Language " + this.language);
+      info(err, 'Language', lang);
     })
     .on('name', function(err, name) {
-      console.log(this.file + ": Name " + this.name);
+      info(err, 'Name', name);
     })
     .on('home', function(err, home) {
-      console.log(this.file + ": URL " + home);
+      info(err, 'URL', home);
     })
     .on('version', function(err, version) {
-      console.log(this.file + ": Version " + version);
+      info(err, 'Version', version);
     })
     .on('set', function(err, encoding) {
-      if (err)
-        console.log(this.file + ': ' + err + ' ' + encoding);
-      else
-        console.log(this.file + ": Encoding " + encoding);
+      info(err, 'Encoding', encoding);
     })
     .on('flag', function(err, flagEnc) {
-      console.log(this.file + ': Flag encoding ' + flagEnc);
+      info(err, 'Flag encoding', flagEnc);
     })
-    .on('prefix', function(err, flag, affix) {
-      console.log(this.file + ": Prefix " + flag);
-    })
-    .on('suffix', function(err, flag, affix) {
-      console.log(this.file + ": Suffix " + flag);
+    .on('affix_flag_set', function(err, id, set) {
+      info(err, 'AF', id + ' ' + set);
     })
     .on('key', function(err, keys) {
-      console.log(this.file + ": key ", keys);
+      info(err, 'Key', keys);
+    })
+    .on('prefix', function(err, flag, affix) {
+      info(err, 'Prefix', flag);
+    })
+    .on('suffix', function(err, flag, affix) {
+      info(err, 'Suffix', flag);
+    })
+
+    .on('begin_affix', function() {
+    })
+    .on('end_affix', function() {
+    })
+
+    .on('word_count', function(err, count) {
+      info(err, "Word count", count);
     })
     .on('word', function(err, entry) {
-      console.log(entry.word);
+      info(err, 'Word', entry.word);
+    })
+
+    .on('end_dict', function(err, entry) {
     })
     ;
 
