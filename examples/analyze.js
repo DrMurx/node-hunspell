@@ -1,79 +1,94 @@
-var optimist  = require('optimist')
-                .usage('Usage: $0 --lang [en_US]')
-                .alias('l', 'lang')
-                .describe('l', 'Language to load'),
-    argv      = optimist.argv,
-    fs        = require('fs'),
-    reader    = require('..').reader;
+var optimist   = require('optimist')
+                 .usage('Usage: $0 --lang [en_US]')
+                 .alias('l', 'lang')
+                 .describe('l', 'Language to load'),
+    argv       = optimist.argv,
+    fs         = require('fs'),
+    lib        = require('..');
 
 
-function read(dictFile, affFile) {
-  if (!dictFile.match(/\.dic$/)) return;
-  if (!affFile.match(/\.aff$/)) return;
+function read(dictFile) {
+  var reader     = new lib.Reader(dictFile);
+  var dictionary = new lib.Dictionary(reader);
 
-  var Reader = new reader.Reader(dictFile, affFile);
-
-  function info(err, label, info) {
-    console.log(dictFile + ": " + label + " " + info);
+  function info(label, info) {
+    console.log(dictFile + ": " + label, info);
   }
 
-  Reader
-    .on('lang', function(err, lang) {
-      info(err, 'Language', lang);
+  reader
+    .on('error', function(err) {
+      throw err;
     })
-    .on('name', function(err, name) {
-      info(err, 'Name', name);
+    .on('begin', function(dictFile) {
     })
-    .on('home', function(err, home) {
-      info(err, 'URL', home);
-    })
-    .on('version', function(err, version) {
-      info(err, 'Version', version);
-    })
-    .on('set', function(err, encoding) {
-      info(err, 'Encoding', encoding);
-    })
-    .on('flag', function(err, flagEnc) {
-      info(err, 'Flag encoding', flagEnc);
-    })
-    .on('affix_flag_set', function(err, id, set) {
-      info(err, 'AF', id + ' ' + set);
-    })
-    .on('key', function(err, keys) {
-      info(err, 'Key', keys);
-    })
-    .on('prefix', function(err, flag, affix) {
-      info(err, 'Prefix', flag);
-    })
-    .on('suffix', function(err, flag, affix) {
-      info(err, 'Suffix', flag);
+    .on('end', function(entry) {
     })
 
-    .on('begin_affix', function() {
+    // Word file
+    .on('begin_dict_file', function(fileRecord) {
     })
-    .on('end_affix', function() {
+    .on('end_dict_file', function(fileRecord) {
+      info('Dictfile', fileRecord);
+    })
+    .on('word_count', function(count) {
+      info("Word count", count);
+    })
+    .on('data', function(entry) {
+      info('Word', entry);
     })
 
-    .on('word_count', function(err, count) {
-      info(err, "Word count", count);
+    // Affix file
+    .on('begin_affix_file', function(fileRecord) {
     })
-    .on('word', function(err, entry) {
-      info(err, 'Word', entry.word);
+    .on('end_affix_file', function(fileRecord) {
+      info('Affixfile', fileRecord);
     })
-
-    .on('end_dict', function(err, entry) {
+    .on('lang', function(lang) {
+      info('Language', lang);
+    })
+    .on('name', function(name) {
+      info('Name', name);
+    })
+    .on('home', function(home) {
+      info('URL', home);
+    })
+    .on('version', function(version) {
+      info('Version', version);
+    })
+    .on('set', function(encoding) {
+      info('Encoding', encoding);
+    })
+    .on('flag', function(flagEnc) {
+      info('Flag encoding', flagEnc);
+    })
+    .on('affix_flag_set', function(id, set) {
+      info('AF', id + ' ' + set);
+    })
+    .on('key', function(keys) {
+      info('Key', keys.join(', '));
+    })
+    .on('prefix', function(flag, affix) {
+      info('Prefix', flag);
+    })
+    .on('suffix', function(flag, affix) {
+      info('Suffix', flag);
     })
     ;
 
-  Reader.load();
+  reader.load(function() {
+//    console.log(reader);
+  });
+
+  return dictionary;
 }
 
 if (argv.lang) {
-  read('./dicts/' + argv.lang + '.dic', './dicts/' + argv.lang + '.aff');
+  read('./dicts/' + argv.lang + '.dic');
 } else {
   fs.readdir('./dicts', function(err, files) {
     files.forEach(function(file) {
-      read('./dicts/' + file, './dicts/' + file.replace(/\.dic$/g, '.aff'));
+      if (!file.match(/\.dic$/)) return;
+      read('./dicts/' + file);
     });
   });
 }
